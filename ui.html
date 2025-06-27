@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .maxcont {
+            padding-top: 80px;
+            padding-bottom: 80px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            font-size: 14px;
+            line-height: 1.47059;
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #d2d2d7;
+            padding: 12px 20px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-bottom: 1px solid #d2d2d7;
+            padding: 12px 20px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #1d1d1f;
+        }
+        
+        .header p {
+            margin: 0;
+            color: #86868b;
+            font-size: 13px;
+        }
+        
+        .container {
+            padding: 20px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1px solid #d2d2d7;
+        }
+        
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f2f2f7;
+            background: #fafafa;
+        }
+        
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0;
+            color: #1d1d1f;
+        }
+        
+        .section-subtitle {
+            font-size: 13px;
+            color: #86868b;
+            margin: 2px 0 0 0;
+        }
+        
+        .frames-list {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        
+        .frame-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f2f2f7;
+            cursor: move;
+            transition: background-color 0.2s ease;
+        }
+        
+        .frame-item:hover {
+            background-color: #f8f8f8;
+        }
+        
+        .frame-item:last-child {
+            border-bottom: none;
+        }
+        
+        .frame-item.dragging {
+            opacity: 0.5;
+        }
+        
+        .drag-handle {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #86868b;
+            font-size: 16px;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .frame-checkbox {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #007aff;
+        }
+        
+        .frame-thumbnail {
+            width: 44px;
+            height: 32px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 12px;
+            border: 1px solid #e5e5e7;
+        }
+        
+        .frame-info {
+            flex: 1;
+        }
+        
+        .frame-name {
+            font-weight: 500;
+            margin: 0 0 2px 0;
+            color: #1d1d1f;
+            font-size: 14px;
+        }
+        
+        .frame-dimensions {
+            font-size: 12px;
+            color: #86868b;
+            margin: 0;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+        }
+        
+        .control-select, .control-input {
+            padding: 8px 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #007aff;
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #86868b;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-controls {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f2f2f7;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filter-button {
+            padding: 6px 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 6px;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-button.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #007aff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-primary:disabled {
+            background: #c7c7cc;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f2f2f7;
+            color: #1d1d1f;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e5ea;
+        }
+        
+        .status {
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            color: #30d158;
+            background: #f0fff4;
+        }
+        
+        .status.error {
+            color: #ff3b30;
+            background: #fff5f5;
+        }
+        
+        .status.loading {
+            color: #007aff;
+            background: #f0f8ff;
+        }
+        
+        .status.empty {
+            color: #86868b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #86868b;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        
+        .empty-state-subtitle {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Frame Exporter Pro</h1>
+        <p>Export selected frames as high-quality PDF</p>
+    </div>
+
+    <div class="maxcont">
+        <div class="container">
+            <!-- Statistics Section -->
+            <div class="section">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <p class="stat-value" id="total-frames">0</p>
+                        <p class="stat-label">Total Frames</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-value" id="selected-frames">0</p>
+                        <p class="stat-label">Selected</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-value" id="estimated-pages">0</p>
+                        <p class="stat-label">PDF Pages</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frames Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Frames</h2>
+                    <p class="section-subtitle">Drag to reorder • Click to select/deselect</p>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-row">
+                        <input type="text" class="search-input" id="search-frames" placeholder="Search frames...">
+                        <button class="filter-button" id="select-all">All</button>
+                        <button class="filter-button" id="select-none">None</button>
+                    </div>
+                    <div class="filter-row">
+                        <button class="filter-button" id="sort-name">Name</button>
+                        <button class="filter-button" id="sort-size">Size</button>
+                        <button class="filter-button" id="sort-position">Position</button>
+                    </div>
+                </div>
+                
+                <div class="frames-list" id="frames-list">
+                    <div class="empty-state" id="empty-state">
+                        <div class="empty-state-icon">📱</div>
+                        <h3 class="empty-state-title">No frames selected</h3>
+                        <p class="empty-state-subtitle">Select frames in Figma to get started</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Settings Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Export Settings</h2>
+                    <p class="section-subtitle">Configure quality and output options</p>
+                </div>
+                
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label class="control-label">Resolution Scale</label>
+                        <select class="control-select" id="scale">
+                            <option value="0.5">0.5x (Draft)</option>
+                            <option value="1" selected>1x (Standard)</option>
+                            <option value="1.5">1.5x (High)</option>
+                            <option value="2">2x (Retina)</option>
+                            <option value="3">3x (Ultra)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Image Quality</label>
+                        <select class="control-select" id="quality">
+                            <option value="0.6">60% (Small)</option>
+                            <option value="0.8" selected>80% (Balanced)</option>
+                            <option value="0.9">90% (High)</option>
+                            <option value="1">100% (Maximum)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Page Size</label>
+                        <select class="control-select" id="page-size">
+                            <option value="auto" selected>Auto (Frame size)</option>
+                            <option value="a4">A4 (210×297mm)</option>
+                            <option value="letter">Letter (8.5×11")</option>
+                            <option value="a3">A3 (297×420mm)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Margin</label>
+                        <select class="control-select" id="margin">
+                            <option value="0">No margin</option>
+                            <option value="10" selected>10mm</option>
+                            <option value="20">20mm</option>
+                            <option value="30">30mm</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="preview-btn">Preview</button>
+                    <button class="btn btn-primary" id="export-btn" disabled>Export PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status empty" id="status">Select frames to begin</div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        console.log("UI script starting...");
+        
+        // Global variables
+        let currentFrames = [];
+        let filteredFrames = [];
+        let isReady = false;
+        let draggedElement = null;
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM loaded, initializing...");
+            initializeEventListeners();
+            sendReady();
+        });
+
+        function sendReady() {
+            console.log("Sending ready message to plugin");
+            parent.postMessage({ pluginMessage: { type: "ready" } }, "*");
+            isReady = true;
+        }
+
+        function showStatus(type, message) {
+            const statusElement = document.getElementById('status');
+            statusElement.classList.remove('success', 'error', 'loading', 'empty');
+            statusElement.classList.add(type);
+            statusElement.textContent = message;
+        }
+
+        function initializeEventListeners() {
+            // Search functionality
+            document.getElementById('search-frames').addEventListener('input', handleSearch);
+            
+            // Filter buttons
+            document.getElementById('select-all').addEventListener('click', () => selectFrames(true));
+            document.getElementById('select-none').addEventListener('click', () => selectFrames(false));
+            
+            // Sort buttons
+            document.getElementById('sort-name').addEventListener('click', () => sortFrames('name'));
+            document.getElementById('sort-size').addEventListener('click', () => sortFrames('size'));
+            document.getElementById('sort-position').addEventListener('click', () => sortFrames('position'));
+            
+            // Export buttons
+            document.getElementById('export-btn').addEventListener('click', handleExport);
+            document.getElementById('preview-btn').addEventListener('click', handlePreview);
+            
+            // Settings change listeners
+            ['scale', 'quality', 'page-size', 'margin'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateStats);
+            });
+        }
+
+        // Handle messages from plugin
+        window.addEventListener('message', (event) => {
+            if (!event.data.pluginMessage) return;
+            
+            const { type, frames, images, exportSettings, message } = event.data.pluginMessage;
+            
+            switch(type) {
+                case "thumbnails":
+                    handleThumbnails(frames);
+                    break;
+                case "images":
+                    generatePDF(images, exportSettings);
+                    break;
+                case "error":
+                    showStatus('error', 'Error: ' + message);
+                    break;
+            }
+        });
+
+        function handleThumbnails(frames) {
+            console.log("Handling thumbnails:", frames);
+            currentFrames = frames || [];
+            filteredFrames = [...currentFrames];
+            renderFrames();
+            updateStats();
+            
+            if (currentFrames.length === 0) {
+                showStatus('empty', 'No frames selected in Figma');
+                document.getElementById('empty-state').style.display = 'block';
+            } else {
+                document.getElementById('empty-state').style.display = 'none';
+                showStatus('success', `${currentFrames.length} frame(s) loaded`);
+            }
+        }
+
+        function renderFrames() {
+            const framesList = document.getElementById('frames-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (filteredFrames.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            // Clear existing frames (except empty state)
+            const existingFrames = framesList.querySelectorAll('.frame-item');
+            existingFrames.forEach(item => item.remove());
+            
+            filteredFrames.forEach((frame, index) => {
+                const frameElement = createFrameElement(frame, index);
+                framesList.appendChild(frameElement);
+            });
+        }
+
+        function createFrameElement(frame, index) {
+            const div = document.createElement('div');
+            div.className = 'frame-item';
+            div.draggable = true;
+            div.dataset.frameId = frame.id;
+            
+            div.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <input type="checkbox" class="frame-checkbox" checked value="${frame.id}" data-frame-id="${frame.id}">
+                <img class="frame-thumbnail" src="data:image/png;base64,${frame.thumbnail}" alt="${frame.name}">
+                <div class="frame-info">
+                    <p class="frame-name">${frame.name}</p>
+                    <p class="frame-dimensions">${Math.round(frame.width)} × ${Math.round(frame.height)}px</p>
+                </div>
+            `;
+            
+            // Add event listeners
+            const checkbox = div.querySelector('.frame-checkbox');
+            checkbox.addEventListener('change', updateStats);
+            
+            // Drag and drop
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragover', handleDragOver);
+            div.addEventListener('drop', handleDrop);
+            div.addEventListener('dragend', handleDragEnd);
+            
+            return div;
+        }
+
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            filteredFrames = currentFrames.filter(frame => 
+                frame.name.toLowerCase().includes(searchTerm)
+            );
+            renderFrames();
+            updateStats();
+        }
+
+        function selectFrames(selectAll) {
+            const checkboxes = document.querySelectorAll('.frame-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll;
+            });
+            updateStats();
+        }
+
+        function sortFrames(sortBy) {
+            // Update active sort button
+            document.querySelectorAll('#sort-name, #sort-size, #sort-position').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`sort-${sortBy}`).classList.add('active');
+            
+            switch(sortBy) {
+                case 'name':
+                    filteredFrames.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'size':
+                    filteredFrames.sort((a, b) => (b.width * b.height) - (a.width * a.height));
+                    break;
+                case 'position':
+                    filteredFrames.sort((a, b) => a.y - b.y || a.x - b.x);
+                    break;
+            }
+            
+            renderFrames();
+        }
+
+        // Drag and drop functionality
+        function handleDragStart(event) {
+            draggedElement = event.target;
+            event.target.classList.add('dragging');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            
+            if (draggedElement && event.target.closest('.frame-item')) {
+                const targetElement = event.target.closest('.frame-item');
+                const draggedId = draggedElement.dataset.frameId;
+                const targetId = targetElement.dataset.frameId;
+                
+                if (draggedId !== targetId) {
+                    // Reorder frames in array
+                    const draggedIndex = filteredFrames.findIndex(f => f.id === draggedId);
+                    const targetIndex = filteredFrames.findIndex(f => f.id === targetId);
+                    
+                    const draggedFrame = filteredFrames.splice(draggedIndex, 1)[0];
+                    filteredFrames.splice(targetIndex, 0, draggedFrame);
+                    
+                    renderFrames();
+                }
+            }
+        }
+
+        function handleDragEnd(event) {
+            event.target.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        function updateStats() {
+            const totalFrames = filteredFrames.length;
+            const selectedCheckboxes = document.querySelectorAll('.frame-checkbox:checked');
+            const selectedCount = selectedCheckboxes.length;
+            
+            document.getElementById('total-frames').textContent = totalFrames;
+            document.getElementById('selected-frames').textContent = selectedCount;
+            document.getElementById('estimated-pages').textContent = selectedCount;
+            
+            // Enable/disable export button
+            const exportBtn = document.getElementById('export-btn');
+            exportBtn.disabled = selectedCount === 0;
+        }
+
+        function handlePreview() {
+            const selectedIds = getSelectedFrameIds();
+            if (selectedIds.length === 0) {
+                alert('Please select at least one frame');
+                return;
+            }
+            
+            showStatus('loading', 'Generating preview...');
+            // Could implement preview functionality here
+            setTimeout(() => {
+                showStatus('success', 'Preview ready');
+            }, 1000);
+        }
+
+        function handleExport() {
+            const checkboxes = document.querySelectorAll('.frame-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one frame');
+                return;
+            }
+
+            const settings = {
+                scale: parseFloat(document.getElementById('scale').value),
+                quality: parseFloat(document.getElementById('quality').value),
+                pageSize: document.getElementById('page-size').value,
+                margin: parseInt(document.getElementById('margin').value)
+            };
+            
+            showStatus('loading', 'Exporting frames...');
+            
+            parent.postMessage({
+                pluginMessage: {
+                    type: "export-selected",
+                    ids: selectedIds,
+                    ...settings
+                }
+            }, "*");
+        }
+
+        function getSelectedFrameIds() {
+            const selectedCheckboxes = document.querySelectorAll('.frame-checkbox:checked');
+            return Array.from(selectedCheckboxes).map(cb => cb.value);
+        }
+
+        function generatePDF(images, settings) {
+            console.log("Generating PDF with", images.length, "images");
+            
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showStatus('error', 'PDF library not loaded');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            // calcola la dimensione del primo frame
+            const frameWidthPx = images[0].width;
+            const frameHeightPx = images[0].height;
+
+            // converti in millimetri
+            const frameWidthMm = frameWidthPx * 25.4 / 96;
+            const frameHeightMm = frameHeightPx * 25.4 / 96;
+
+            // crea un pdf con dimensioni uguali al frame
+            let pdf = new jsPDF({
+            orientation: frameWidthMm > frameHeightMm ? "landscape" : "portrait",
+            unit: "mm",
+            format: [frameWidthMm, frameHeightMm]
+            });
+            let processedCount = 0;
+
+            if (images.length === 0) {
+                showStatus('error', 'No images to export');
+                return;
+            }
+
+        images.forEach((frame, index) => {
+          console.log(`Processing image ${index + 1}/${images.length}: ${frame.name}`);
+          
+          try {
+            const img = new Image();
+            img.onload = () => {
+              console.log(`Image ${index + 1} loaded successfully`);
+              
+              // Aggiungi immagine al PDF
+              const pageWidth = 210; // A4 width
+              const pageHeight = 297; // A4 height
+              const margin = 10;
+              
+              const maxWidth = pageWidth - (margin * 2);
+              const maxHeight = pageHeight - (margin * 2);
+              
+              let imgWidth = maxWidth;
+              let imgHeight = (img.height * maxWidth) / img.width;
+              
+              if (imgHeight > maxHeight) {
+                imgHeight = maxHeight;
+                imgWidth = (img.width * maxHeight) / img.height;
+              }
+              
+              const x = (pageWidth - imgWidth) / 2;
+              const y = (pageHeight - imgHeight) / 2;
+              
+                pdf.addImage(img, "PNG", 0, 0, frameWidthMm, frameHeightMm);
+              
+              processedCount++;
+              
+              if (index < images.length - 1) {
+                pdf.addPage();
+              }
+              
+              if (processedCount === images.length) {
+                console.log("All images processed, downloading PDF");
+                
+                const pdfBlob = pdf.output("blob");
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "exported-frames.pdf";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                document.getElementById("status").textContent = "✅ PDF esportato con successo!";
+              }
+            };
+            
+            img.onerror = () => {
+              console.error(`Failed to load image ${index + 1}`);
+              document.getElementById("status").textContent = `❌ Errore caricamento immagine ${index + 1}`;
+            };
+            
+            img.src = `data:image/png;base64,${frame.data}`;
+            
+          } catch (error) {
+            console.error("Error processing image:", error);
+            document.getElementById("status").textContent = "❌ Errore durante il processamento";
+          }
+        });
+      }
+
+      // Event listener per messaggi dal plugin
+      window.addEventListener('message', (event) => {
+        console.log("Message received:", event.data);
+        
+        if (!event.data.pluginMessage) {
+          console.log("No pluginMessage in event data");
+          return;
+        }
+        
+        const { type, frames, images, message } = event.data.pluginMessage;
+        console.log("Message type:", type);
+        
+        switch(type) {
+          case "thumbnails":
+            console.log("Received thumbnails message");
+            handleThumbnails(frames);
+            break;
+            
+          case "images":
+            console.log("Received images message");
+            generatePDF(images);
+            break;
+            
+          case "error":
+            console.error("Error from plugin:", message);
+            document.getElementById("status").textContent = "❌ Errore: " + message;
+            break;
+            
+          default:
+            console.log("Unknown message type:", type);
+        }
+      });
+
+      // Inizializzazione quando il DOM è pronto
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM loaded");
+        
+        // Aggiungi event listener al bottone export
+        const exportBtn = document.getElementById("export");
+        if (exportBtn) {
+          exportBtn.addEventListener("click", handleExport);
+          console.log("Export button listener added");
+        } else {
+          console.error("Export button not found!");
+        }
+        
+        // Invia messaggio ready
+        sendReady();
+      });
+
+      // Fallback se il DOM è già caricato
+      if (document.readyState === 'loading') {
+        console.log("DOM is loading, waiting for DOMContentLoaded");
+      } else {
+        console.log("DOM already loaded, initializing immediately");
+        setTimeout(() => {
+          const exportBtn = document.getElementById("export");
+          if (exportBtn) {
+            exportBtn.addEventListener("click", handleExport);
+            console.log("Export button listener added (fallback)");
+          }
+          sendReady();
+        }, 100);
+      }
+
+      console.log("UI script loaded completely");
+    </script>
+  </body>
+</html>
